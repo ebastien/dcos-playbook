@@ -1,0 +1,9 @@
+---
+root_key_files: []
+wan_if: eth0
+lan_if: eth1
+lan_ip: 172.16.0.1
+lan_mask: 255.255.0.0
+trusted_nets: []
+public_ports: []
+docker_version: 1.11.2

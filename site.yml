@@ -1,0 +1,26 @@
+---
+- name: DC/OS bootstrap node
+  hosts: bootstrap
+  remote_user: root
+  roles:
+    - common
+
+- name: DC/OS master nodes
+  hosts: master
+  remote_user: root
+  roles:
+    - common
+
+- name: DC/OS private agent nodes
+  hosts: private_agent
+  remote_user: root
+  roles:
+    - common
+
+- name: DC/OS public agent nodes
+  hosts: public_agent
+  remote_user: root
+  vars:
+    public_ports: [80, 443]
+  roles:
+    - common

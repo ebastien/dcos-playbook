@@ -1,0 +1,133 @@
+---
+- name: Set authorized key for root
+  authorized_key:
+    user: root
+    key: '{{ item }}'
+    state: present
+  with_file: "{{ root_key_files }}"
+
+- name: set timezone to UTC
+  timezone: name=UTC
+  notify:
+    - restart cron
+
+- name: setup lan interface
+  template:
+    src: ifcfg.j2
+    dest: /etc/sysconfig/network-scripts/ifcfg-{{ lan_if }}
+  notify:
+    - reload lan interface
+
+- name: resolve hostname as lan ip address
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+
+- name: install epel repo
+  yum: name=epel-release state=present
+
+- name: install docker repo
+  yum_repository:
+    name: docker
+    description: Docker Repository
+    baseurl: https://yum.dockerproject.org/repo/main/centos/$releasever/
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: https://yum.dockerproject.org/gpg
+
+- name: disable selinux
+  selinux: state=disabled
+
+- name: disable and stop named
+  systemd: name=named state=stopped enabled=no
+
+- name: install ntp
+  yum: name=ntp state=present
+
+- name: disable and stop chrony
+  systemd: name=chronyd state=stopped enabled=no
+
+- name: enable and start ntp
+  systemd: name=ntpd state=started enabled=yes
+
+- name: install htop
+  yum: name=htop state=present
+
+- name: install yum-versionlock
+  yum: name=yum-versionlock state=present
+
+- name: install iptables-services
+  yum: name=iptables-services state=present
+
+- name: enable iptables service
+  systemd: name=iptables enabled=yes
+
+- name: enable ip6tables service
+  systemd: name=ip6tables enabled=yes
+
+- name: iptables configuration
+  template:
+    src: iptables.j2
+    dest: /etc/sysconfig/iptables
+  notify:
+    - reload iptables
+
+- name: ip6tables configuration
+  template:
+    src: ip6tables.j2
+    dest: /etc/sysconfig/ip6tables
+  notify:
+    - reload ip6tables
+
+- name: fetch docker version
+  shell: yum list installed docker-engine | grep docker-engine | awk '{print $2}' | cut -d'-' -f1
+  register: current_docker_version
+  changed_when: False
+  args:
+    warn: no
+
+- name: remove docker versionlock
+  command: yum versionlock delete docker-engine
+  when:
+    - current_docker_version.stdout is defined
+    - current_docker_version.stdout != docker_version
+  ignore_errors: yes
+  args:
+    warn: no
+
+- name: install docker
+  yum: name=docker-engine-{{ docker_version }} state=present
+  when:
+    - current_docker_version.stdout is defined
+    - current_docker_version.stdout != docker_version
+
+- name: add docker versionlock
+  command: yum versionlock add docker-engine
+  when:
+    - current_docker_version.stdout is defined
+    - current_docker_version.stdout != docker_version
+  args:
+    warn: no
+
+- name: create docker service directory
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+    mode: 0755
+
+- name: override docker service configuration
+  template:
+    src: docker_override.j2
+    dest: /etc/systemd/system/docker.service.d/override.conf
+  notify:
+    - refresh docker service
+
+- name: enable and start docker
+  systemd: name=docker state=started enabled=yes
+
+- name: create the nogroup group
+  group: name=nogroup gid=1000 state=present
+
+- name: upgrade all packages
+  yum: name=* state=latest
+

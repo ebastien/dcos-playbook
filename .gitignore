@@ -1,0 +1,4 @@
+/public_keys/
+/group_vars/all.yml
+/hosts
+*.retry

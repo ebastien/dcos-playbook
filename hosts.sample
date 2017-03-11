@@ -1,0 +1,11 @@
+[bootstrap]
+boot.dcos.net lan_ip=172.16.0.1
+
+[master]
+master.dcos.net lan_ip=172.16.0.2
+
+[private_agent]
+agent0.dcos.net lan_ip=172.16.0.3
+
+[public_agent]
+agent1.dcos.net lan_ip=172.16.0.4

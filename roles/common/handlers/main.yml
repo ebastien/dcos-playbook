@@ -1,0 +1,15 @@
+---
+- name: reload lan interface
+  shell: "/usr/sbin/ifdown {{ lan_if }}; /usr/sbin/ifup {{ lan_if }}"
+
+- name: refresh docker service
+  systemd: name=docker state=restarted daemon_reload=yes
+
+- name: reload iptables
+  systemd: name=iptables state=restarted
+
+- name: reload ip6tables
+  systemd: name=ip6tables state=restarted
+
+- name: restart cron
+  systemd: name=crond state=restarted
