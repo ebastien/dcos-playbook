@@ -53,6 +53,12 @@
 - name: install htop
   yum: name=htop state=present
 
+- name: install tcpdump
+  yum: name=tcpdump state=present
+
+- name: install bridge-utils
+  yum: name=bridge-utils state=present
+
 - name: install yum-versionlock
   yum: name=yum-versionlock state=present
 
