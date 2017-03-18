@@ -10,7 +10,7 @@ COMMIT
 :DOCKER - [0:0]
 -A PREROUTING -m addrtype --dst-type LOCAL -j DOCKER
 -A OUTPUT ! -d 127.0.0.0/8 -m addrtype --dst-type LOCAL -j DOCKER
--A POSTROUTING -s 172.18.0.0/16 ! -o docker0 -j MASQUERADE
+-A POSTROUTING -s {{ docker_bridge_net }} ! -o docker0 -j MASQUERADE
 -A DOCKER -i docker0 -j RETURN
 COMMIT
 *mangle
