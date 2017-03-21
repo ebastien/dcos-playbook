@@ -1,6 +1,12 @@
 *raw
 :PREROUTING ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
+{% for rule in iptables_raw_prerouting %}
+-A PREROUTING {{ rule }}
+{% endfor %}
+{% for rule in iptables_raw_output %}
+-A OUTPUT {{ rule }}
+{% endfor %}
 COMMIT
 *nat
 :PREROUTING ACCEPT [0:0]
@@ -39,11 +45,17 @@ COMMIT
 -A INPUT -i {{ wan_if }} -p tcp -m state --state NEW -m tcp --dport {{ port }} -m comment --comment "public port" -j ACCEPT
 {% endfor %}
 -A INPUT -j DROP
+{% for rule in iptables_filter_forward %}
+-A FORWARD {{ rule }}
+{% endfor %}
 -A FORWARD -j DOCKER-ISOLATION
 -A FORWARD -o docker0 -j DOCKER
 -A FORWARD -o docker0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 -A FORWARD -i docker0 ! -o docker0 -j ACCEPT
 -A FORWARD -i docker0 -o docker0 -j ACCEPT
 -A FORWARD -j DROP
+{% for rule in iptables_filter_output %}
+-A OUTPUT {{ rule }}
+{% endfor %}
 -A DOCKER-ISOLATION -j RETURN
 COMMIT

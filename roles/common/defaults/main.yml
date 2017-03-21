@@ -9,3 +9,7 @@ public_ports: []
 docker_version: 1.11.2
 docker_bridge_ip: 172.18.0.1/16
 docker_bridge_net: 172.18.0.0/16
+iptables_raw_prerouting: []
+iptables_raw_output: []
+iptables_filter_forward: []
+iptables_filter_output: []

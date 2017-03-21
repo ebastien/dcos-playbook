@@ -9,13 +9,13 @@
   hosts: master
   remote_user: root
   roles:
-    - common
+    - dcos
 
 - name: DC/OS private agent nodes
   hosts: private_agent
   remote_user: root
   roles:
-    - common
+    - dcos
 
 - name: DC/OS public agent nodes
   hosts: public_agent
@@ -23,4 +23,4 @@
   vars:
     public_ports: [80, 443]
   roles:
-    - common
+    - dcos
